@@ -39,11 +39,14 @@ services:
       - "s3.example.com:172.18.0.20"
     depends_on:
       - minio1
-    entrypoint: /bin/sh -c "/usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure;
+    volumes:
+      - ./data:/tmp/data
+    entrypoint: /bin/sh -c "/usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure; 
                             /usr/bin/mc admin user add s3admin anthony nocentino --insecure;
                             /usr/bin/mc admin policy set s3admin readwrite user=anthony --insecure;
                             /usr/bin/mc alias set anthony https://s3.example.com:9000 anthony nocentino --insecure;
-                            /usr/bin/mc mb anthony/sqlbackups  --insecure;"
+                            /usr/bin/mc mb anthony/sqldatavirt  --insecure;
+                            /usr/bin/mc cp /tmp/data/helloworld.csv anthony/sqldatavirt/helloworld.csv --insecure;"
       
   sql1:
     build:
