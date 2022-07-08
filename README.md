@@ -2,7 +2,7 @@
 
 In this repo, you'll find two example environments for working with SQL Server 2022's s3 object integration, one for backup and restore to s3 compatible object storage and the other for data virtualization using polybase connectivity to s3 compatible object storage.  Let's walk through what you'll get in each environment. 
 
-##Backup and Restore Test Environment
+## Backup and Restore Test Environment
 
 First, in this repo's `backup` directory, there's a script `demo.sh`.  This has the commands you'll need to start up the environment and do a basic connectivity test using a SQL Server backup.  To start everything up, you'll change into the `backup` directory and run `docker-compose up --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
@@ -111,7 +111,7 @@ sqlcmd -S localhost,1433 -U sa -Q $QUERY -P 'S0methingS@Str0ng!'
 When you're all finished you can use `docker-compose down --rmi local --volumes` to stop all the containers and destory all the images and volumes associated with this environemnt.
 
 
-##Polybase and s3 Data Virtualiation Enviroment
+## Polybase and s3 Data Virtualiation Enviroment
 
 Second, in this repo's `polybase` directory, there's a script `demo.sh`.  This has the commands you'll need to start up the environment and do a basic connectivity test using a Polybase based access to s3-compatible object stroage.  To start everything up, you'll change into the `polybase` directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
