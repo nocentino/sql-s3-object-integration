@@ -117,7 +117,7 @@ When you're all finished, you can use `docker-compose down --rmi local --volumes
 
 ## Polybase and s3 Data Virtualization Environment
 
-Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script `demo.sh`.  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase)directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
+Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script `demo.sh`.  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
 This docker-compose manifest starts the same as the backup one above.  But in addition to that, it creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
 
