@@ -114,9 +114,9 @@ When you're all finished, you can use `docker-compose down --rmi local --volumes
 
 Second, in this repo's `polybase` directory, there's a script `demo.sh`.  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the `polybase` directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
-This docker-compose manifest starts the same as the backup one above.  It creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
+This docker-compose manifest starts the same as the backup one above.  But in addition to that, it creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
 
-Since Polybase isn't enabled in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named `dockerfile.sql`.
+Since Polybase isn't enabled in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named `dockerfile.sql`. 
 
 ### Start up the environment
 
@@ -180,21 +180,21 @@ Create your external datasource on your s3 compatible object storage, referencin
 ```
 CREATE EXTERNAL DATA SOURCE s3_ds
 WITH
-(   LOCATION = 's3://s3.example.com:9000/'
-,   CREDENTIAL = s3_dc
+(    LOCATION = 's3://s3.example.com:9000/'
+,    CREDENTIAL = s3_dc
 )
 ```
 
 First, we can access data in the s3 bucket and for a simple test, let's start with CSV.  During the docker compose up, the build copied a CSV into the bucket it created.  This should output `Hello World!`
 ```
 SELECT  * 
-FROM    OPENROWSET
-        (   BULK '/sqldatavirt/helloworld.csv'
-        ,   FORMAT       = 'CSV'
-        ,   DATA_SOURCE  = 's3_ds'
-        ) 
-WITH    ( c1 varchar(50) )             
-AS [Test1]
+FROM OPENROWSET
+(    BULK '/sqldatavirt/helloworld.csv'
+,    FORMAT       = 'CSV'
+,    DATA_SOURCE  = 's3_ds'
+) 
+WITH ( c1 varchar(50) )             
+AS   [Test1]
 ```
 
 `OPENROWSET` is cool for infrequent access, but if you want to layer on sql server security or use statistics on the data in the external data source,
@@ -203,17 +203,21 @@ AS [Test1]
 ```
 CREATE EXTERNAL FILE FORMAT CSVFileFormat
 WITH
-(   FORMAT_TYPE = DELIMITEDTEXT
-,   FORMAT_OPTIONS  (    FIELD_TERMINATOR = ','
-                    ,    STRING_DELIMITER = '"'
-                    ,    FIRST_ROW = 1 )
+(    FORMAT_TYPE = DELIMITEDTEXT
+,    FORMAT_OPTIONS  ( FIELD_TERMINATOR = ','
+,                      STRING_DELIMITER = '"'
+,                      FIRST_ROW = 1 )
 );
 ```
 
 Next, we define the table's structure.  The CSV here is mega simple, just a single row with a single column When defining the external table where the data lives on our network with `DATA_SOURCE`, the `LOCATION` within that `DATA_SOURCE` and the `FILE_FORMAT`
 ```
 CREATE EXTERNAL TABLE HelloWorld ( c1 varchar(50) )
-WITH (DATA_SOURCE = s3_ds, LOCATION = '/sqldatavirt/helloworld.csv',  FILE_FORMAT = CSVFileFormat);
+WITH (
+     DATA_SOURCE = s3_ds
+,    LOCATION = '/sqldatavirt/helloworld.csv'
+,    FILE_FORMAT = CSVFileFormat
+);
 ```
 
 Now we can access the data just like any other table in SQL server. 
