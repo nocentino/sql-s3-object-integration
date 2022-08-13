@@ -4,7 +4,6 @@ In this repo, you'll find two example environments for using SQL Server 2022's s
 
 In my post [Setting up MinIO for SQL Server 2022 s3 Object Storage Integration](https://www.nocentino.com/posts/2022-06-10-setting-up-minio-for-sqlserver-object-storage/) we did this step by step at the command line. Using Docker Compose it will do all the hard work for you and you can get up and running fast. 
 
-
 Let's walk through what you'll get in each environment. 
 
 ## Backup and Restore Test Environment
@@ -95,7 +94,7 @@ Finally, we start a service named `sql1`, which runs the latest published contai
       - MSSQL_SA_PASSWORD=S0methingS@Str0ng!
 ```
 
-Once the containers are up and running, you'll want to create a database, create a credential for access to your s3 bucket in MinIO, then run a backup.  Here's some example code for that using `sqlcmd`.
+Once the containers are up and running, you'll want to create a database, create a credential for access to your s3 bucket in MinIO, then run a backup.  Here's some example code to backup to our MinIO container. 
 
 Create a database in SQL Server
 ```
@@ -117,17 +116,17 @@ When you're all finished, you can use `docker-compose down --rmi local --volumes
 
 ## Polybase and s3 Data Virtualization Environment
 
-Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script `demo.sh`.  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
+Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
 This docker-compose manifest starts the same as the backup one above.  But in addition to that, it creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
 
-Since Polybase isn't enabled in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named `dockerfile.sql`. 
+Since Polybase isn't enabled by default in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named [`dockerfile.sql`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/dockerfile.sql). 
 
 ### Start up the environment
 
-Once you're ready to go, start up the environment with `docker-compose up --build --detach` and follow the steps in `demo.sh`
+Once you're ready to go, start up the environment with `docker-compose up --build --detach` and follow the steps in [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).
 
-With the SQL Server container up and running, let's walk through the steps to access data on s3 compatible object storage. All this code is in `demo.sql` in the repo. But I want to walk you through it here too. 
+With the SQL Server container up and running, let's walk through the steps to access data on s3 compatible object storage. All this code is in [`demo.sql`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sql) in the repo. But I want to walk you through it here too. 
 
 ### Configure Polybase in SQL Server instance 
 
@@ -174,14 +173,14 @@ Before you create the external data source, you need to restart the SQL Server c
 docker-compose restart sql1
 ```
 
-If you don't you'll get this error:
+If you don't restart the SQL Server container you'll get this error:
 ```
 Msg 46530, Level 16, State 11, Line 1
 External data sources are not supported with type GENERIC.
 ```
 
 
-Create your external datasource on your s3 compatible object storage, referencing where it is on the network (LOCATION), and the credential you just defined
+Create your external datasource on your s3 compatible object storage, referencing where it is on the network `LOCATION`, and the credential you just defined
 
 ```
 CREATE EXTERNAL DATA SOURCE s3_ds
@@ -203,7 +202,7 @@ WITH ( c1 varchar(50) )
 AS   [Test1]
 ```
 
-`OPENROWSET` is cool for infrequent access, but if you want to layer on sql server security or use statistics on the data in the external data source,
+`OPENROWSET` is cool for infrequent access, but if you want to layer on SQL Server security or use statistics on the data in the external data source,
  let's create an external table.  This first requires defining an external file format.  In this example, its CSV
 
 ```
@@ -216,7 +215,7 @@ WITH
 );
 ```
 
-Next, we define the table's structure.  The CSV here is mega simple, just a single row with a single column When defining the external table where the data lives on our network with `DATA_SOURCE`, the `LOCATION` within that `DATA_SOURCE` and the `FILE_FORMAT`
+Next, we define the table's structure.  The CSV here is mega simple, just a couple rows with a two columns. When defining the external table where the data lives on our network with `DATA_SOURCE`, the `LOCATION` within that `DATA_SOURCE` and the `FILE_FORMAT`
 ```
 CREATE EXTERNAL TABLE HelloWorld ( c1 varchar(50) )
 WITH (
@@ -233,10 +232,13 @@ SELECT * FROM [HelloWorld];
 
 ## A note about Polybase using containers with default settings
 
+If you get this error below, you will want to increase the memory resource in your Docker configuration. The default is 2GB, I set it to 4GB an all worked. 
+
 ```
 2022-08-13 13:09:43.22 spid41s     There is insufficient system memory in resource pool 'internal' to run this query.
 ```
 
-Changed default memory resources from 2GB to 4GB
+
+## Wrap things up
 
 When you're done, you can use `docker-compose down --volumes  --rmi local` to clean up all the resources, images, network, and the volumes holding the database in the databases and MinIO.
