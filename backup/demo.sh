@@ -1,4 +1,5 @@
 #Start up our environment with docker compose. This can take a second for SQL Server to come online.
+cd ./backup
 docker-compose up --detach
 
 #Create a database in SQL Server

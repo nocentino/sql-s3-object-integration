@@ -16,6 +16,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists
 
+RUN /opt/mssql/bin/mssql-conf traceflag 13702 on
+
 # Run SQL Server process as non-root
 USER mssql
 CMD /opt/mssql/bin/sqlservr
