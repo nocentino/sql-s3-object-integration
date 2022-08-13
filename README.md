@@ -1,6 +1,6 @@
 # sql-s3-object-integration
 
-In this repo, you'll find two example environments for using SQL Server 2022's s3 object integration.  one for [backup and restore](#backup-and-restore-test-environment) to s3 compatible object storage and the other for [data virtualization](#polybase-and-s3-data-virtualiation-enviroment) using Polybase connectivity to s3 compatible object storage.  This work aims to get you up and running as quickly as possible to work with these new features.  I implemented this in Docker Compose since that handles all the implementation and configuration steps for you.
+In this repo, you'll find two example environments for using SQL Server 2022's s3 object integration.  One for [backup and restore](#backup-and-restore-test-environment) to s3 compatible object storage and the other for [data virtualization](#polybase-and-s3-data-virtualiation-enviroment) using Polybase connectivity to s3 compatible object storage.  This work aims to get you up and running as quickly as possible to work with these new features.  I implemented this in Docker Compose since that handles all the implementation and configuration steps for you.
 
 In my post [Setting up MinIO for SQL Server 2022 s3 Object Storage Integration](https://www.nocentino.com/posts/2022-06-10-setting-up-minio-for-sqlserver-object-storage/) we did this step by step at the command line. Using Docker Compose it will do all the hard work for you and you can get up and running fast. 
 
