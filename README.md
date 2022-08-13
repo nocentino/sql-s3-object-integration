@@ -9,7 +9,7 @@ Let's walk through what you'll get in each environment.
 
 ## Backup and Restore Test Environment
 
-Up first is Backups. In this repo's [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory, there's a script `demo.sh`.  In this script, you will find the commands needed to start the environment and do a basic connectivity test using a SQL Server backup.  To start everything up, you'll change into the [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory and run `docker-compose up --detach`.  This docker-compose manifest will do a few things...let's walk through that.
+Up first is Backups. In this repo's [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory, there's a script `demo.sh`.  In this script, you will find the commands needed to start the environment and do a basic connectivity test using a SQL Server backup.  To start everything up, you'll change into the [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory and run `docker-compose up --detach`. At this point, you'll have a functioning enviroment, but let's dig into the details of how this is implemented in docker compose.
 
 ```
 docker-compose up --detach
