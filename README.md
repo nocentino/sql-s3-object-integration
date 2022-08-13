@@ -97,16 +97,18 @@ docker-compose up --detach
 
 Once the containers are up and running, you'll want to create a database, create a credential for access to your s3 bucket in MinIO, then run a backup.  Here's some example code for that using `sqlcmd`.
 
+Create a database in SQL Server
 ```
-#Create a database in SQL Server
 CREATE DATABASE TESTDB1
+```
 
-
-#Create the S3 credential in SQL Server
+Create the S3 credential in SQL Server
+```
 CREATE CREDENTIAL [s3://s3.example.com:9000/sqlbackups] WITH IDENTITY = 'S3 Access Key', SECRET = 'anthony:nocentino'
+```
 
-
-#Run the backup to the s3 target
+Run the backup to the s3 target
+```
 BACKUP DATABASE TestDB1 TO URL = 's3://s3.example.com:9000/sqlbackups/TestDB1.bak' WITH COMPRESSION, STATS = 10, FORMAT, INIT
 ```
 
