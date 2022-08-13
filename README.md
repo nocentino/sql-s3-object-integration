@@ -110,7 +110,7 @@ BACKUP DATABASE TestDB1 TO URL = 's3://s3.example.com:9000/sqlbackups/TestDB1.ba
 When you're all finished, you can use `docker-compose down --rmi local --volumes` to stop all the containers and destroy all the images and volumes associated with this environment.
 
 
-## Polybase and s3 Data Virtualisation Environment
+## Polybase and s3 Data Virtualization Environment
 
 Second, in this repo's `polybase` directory, there's a script `demo.sh`.  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the `polybase` directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
 
@@ -118,10 +118,13 @@ This docker-compose manifest starts the same as the backup one above.  It create
 
 Since Polybase isn't enabled in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named `dockerfile.sql`.
 
+### Start up the environment
+
 Once you're ready to go, start up the environment with `docker-compose up --build --detach` and follow the steps in `demo.sh`
 
-With the SQL Server container up and running, let's walk through the steps to access data on s3 compatible object storage.
+With the SQL Server container up and running, let's walk through the steps to access data on s3 compatible object storage. All this code is in `demo.sql` in the repo. But I want to walk you through it here too. 
 
+### Configure Polybase in SQL Server instance 
 
 Confirm if the Polybase feature is installed, 1 = installed
 
@@ -138,6 +141,8 @@ Confirm if Polybase is in your running config, run_value should be 1
 ```
 exec sp_configure @configname = 'polybase enabled'
 ```
+
+### Configure access to external data using Polybase over S3
 
 Create a database to hold objects for the demo
 CREATE DATABASE [PolybaseDemo];

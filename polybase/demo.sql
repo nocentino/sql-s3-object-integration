@@ -19,7 +19,7 @@ CREATE DATABASE [PolybaseDemo];
 USE PolybaseDemo
 
 
---Create a database master key, this is use to protect the crendials you're about to create
+--Create a database master key, this is use to protect the credentials you're about to create
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'S0methingS@Str0ng!';  
 
 
@@ -71,5 +71,5 @@ CREATE EXTERNAL TABLE HelloWorld ( c1 varchar(50) )
 WITH (DATA_SOURCE = s3_ds, LOCATION = '/sqldatavirt/helloworld.csv',  FILE_FORMAT = CSVFileFormat);
 
 
---Now we can acces the data just like any other table in sql server. 
+--Now we can access the data just like any other table in sql server. 
 SELECT * FROM [HelloWorld];
