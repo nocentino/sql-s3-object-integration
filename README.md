@@ -238,7 +238,6 @@ If you get this error below, you will want to increase the memory resource in yo
 2022-08-13 13:09:43.22 spid41s     There is insufficient system memory in resource pool 'internal' to run this query.
 ```
 
-
 ## Wrap things up
 
 When you're done, you can use `docker-compose down --volumes  --rmi local` to clean up all the resources, images, network, and the volumes holding the database in the databases and MinIO.
