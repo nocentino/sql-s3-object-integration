@@ -145,8 +145,9 @@ exec sp_configure @configname = 'polybase enabled'
 ### Configure access to external data using Polybase over S3
 
 Create a database to hold objects for the demo
+```
 CREATE DATABASE [PolybaseDemo];
-
+```
 
 Switch into the database context for the PolybaseDemo database
 ```
@@ -163,17 +164,17 @@ Create a database scoped credential, this should have at minimum ReadOnly and Li
 CREATE DATABASE SCOPED CREDENTIAL s3_dc WITH IDENTITY = 'S3 Access Key', SECRET = 'anthony:nocentino' ;
 ```
 
-Before you create the external data source, you need to restart the sql server container. 
+Before you create the external data source, you need to restart the SQL Server container.  To restart your a container started by `docker-compose` you can use this:
+```
+docker-compose restart sql1
+```
 
 If you don't you'll get this error:
 ```
 Msg 46530, Level 16, State 11, Line 1
 External data sources are not supported with type GENERIC.
 ```
-To restart your SQL Server container started by docker-compose you can use this:
-```
-docker-compose restart sql1
-```
+
 
 Create your external datasource on your s3 compatible object storage, referencing where it is on the network (LOCATION), and the credential you just defined
 
