@@ -43,14 +43,14 @@ WITH
 
 
 --First we can access data in the s3 bucket and for a simple test, let's start with CSV. During the docker compose up, the build copied a csv into the bucket it created.
---This should output Hello World!
+--This should output Hello World! several times.
 SELECT  * 
 FROM OPENROWSET
 (    BULK '/sqldatavirt/helloworld.csv'
 ,    FORMAT       = 'CSV'
 ,    DATA_SOURCE  = 's3_ds'
 ) 
-WITH ( c1 varchar(50) )             
+WITH ( c1 int, c2 varchar(20) )
 AS   [Test1]
 
 
@@ -67,7 +67,7 @@ WITH
 
 --Next we define the table's structure. The CSV here is mega simple, just a single row with a single column
 --When defining the external table where the data lives on our network with DATA_SOURCE, the LOCATION within that DATA_SOURCE and the FILE_FORMAT
-CREATE EXTERNAL TABLE HelloWorld ( c1 varchar(50) )
+CREATE EXTERNAL TABLE HelloWorld ( c1 int, c2 varchar(20) )
 WITH (
      DATA_SOURCE = s3_ds
 ,    LOCATION = '/sqldatavirt/helloworld.csv'

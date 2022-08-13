@@ -3,7 +3,7 @@ cd ./polybase
 docker-compose up --build 
 
 
-##Jump over to demo.sql and run the code there. 
+##Jump over to demo.sql and run the code there on your SQL Server instance.
 
 
 ##Remove the images we built and also the volumes we created. 
