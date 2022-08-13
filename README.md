@@ -15,7 +15,7 @@ First, in this repo's `backup` directory, there's a script `demo.sh`.  In this s
 docker-compose up --detach
 ```
 
-1.  First, since SQL Server's s3 object integration requires a valid and trusted certificate, a service named `config` runs a container that creates the required certificate needed for this environment and stores them in the current working directory in a subdirectory named `certs`.
+First, since SQL Server's s3 object integration requires a valid and trusted certificate, a service named `config` runs a container that creates the required certificate needed for this environment and stores them in the current working directory in a subdirectory named `certs`.
 
 ```
   config:
@@ -28,7 +28,7 @@ docker-compose up --detach
     command: openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /certs/private.key -out /certs/public.crt -config /tmp/certs/openssl.cnf
 ```
 
-2.  Second, we start a service named `minio1` that starts a MinIO container on a static IP address of `172.18.0.2` and exposes the data and admin ports on `9000` and `9001`.  There are also two volumes defined a data volume `s3-data` for the object data stored in MinIO, and the other, `certs` is a bind mount exposing the certificates into the MinIO container for use TLS connections.  MinIO automatically configures itself for TLS connectivity when it finds certificates in this location.  The final configurations are the root username and password environment variables and the `command` starting up the container. 
+Second, we start a service named `minio1` that starts a MinIO container on a static IP address of `172.18.0.2` and exposes the data and admin ports on `9000` and `9001`.  There are also two volumes defined a data volume `s3-data` for the object data stored in MinIO, and the other, `certs` is a bind mount exposing the certificates into the MinIO container for use TLS connections.  MinIO automatically configures itself for TLS connectivity when it finds certificates in this location.  The final configurations are the root username and password environment variables and the `command` starting up the container. 
 
 ```
   minio1:
@@ -53,7 +53,7 @@ docker-compose up --detach
     command: server /data --console-address ":9001" 
 ```
 
-3.  Next, the `createbucket` service creates a user in MinIO that we will use inside SQL Server to access MinIO and also creates a bucket named `sqlbackups` for our backup and restore testing.
+Next, the `createbucket` service creates a user in MinIO that we will use inside SQL Server to access MinIO and also creates a bucket named `sqlbackups` for our backup and restore testing.
 
 ```
   createbucket:
@@ -71,7 +71,7 @@ docker-compose up --detach
                             /usr/bin/mc mb anthony/sqlbackups  --insecure;"
 ```
 
-1.  Finally, we start a service named `sql1`, which runs the latest published container image for SQL Server 2022 `mcr.microsoft.com/mssql/server:2022-latest`.  In this service, we add an `extra_host` so that the SQL Server container can resolve the DNS name of our MinIO container so that it can make the proper TLS connection.  There is a data volume for our SQL Server data `sql-data`, and we're using a bind mount to expose the MinIO container's public certificate into SQL Server to that it's trusted using the code `./certs/public.crt:/usr/local/share/ca-certificates/mssql-ca-certificates/public.crt:ro`.  This location has changed in CTP 2.1, and I will update this post once the container is released.
+Finally, we start a service named `sql1`, which runs the latest published container image for SQL Server 2022 `mcr.microsoft.com/mssql/server:2022-latest`.  In this service, we add an `extra_host` so that the SQL Server container can resolve the DNS name of our MinIO container so that it can make the proper TLS connection.  There is a data volume for our SQL Server data `sql-data`, and we're using a bind mount to expose the MinIO container's public certificate into SQL Server to that it's trusted using the code `./certs/public.crt:/usr/local/share/ca-certificates/mssql-ca-certificates/public.crt:ro`.  This location has changed in CTP 2.1, and I will update this post once the container is released.
 
 ```
   sql1:
