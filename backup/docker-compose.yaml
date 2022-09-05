@@ -60,7 +60,7 @@ services:
       - 1433:1433
     volumes:
       - sql-data:/var/opt/mssql
-      - ./certs/public.crt:/usr/local/share/ca-certificates/mssql-ca-certificates/public.crt:ro
+      - ./certs/public.crt:/var/opt/mssql/security/ca-certificates/public.crt:ro
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=S0methingS@Str0ng!

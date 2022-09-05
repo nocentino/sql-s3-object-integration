@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 #Create file layout for SQL and set permissions
 RUN useradd -M -s /bin/bash -u 10001 -g 0 mssql
-RUN mkdir -p -m 770 /var/opt/mssql && chgrp -R 0 /var/opt/mssql
+RUN mkdir -p -m 770 /var/opt/mssql/security/ca-certificates && chgrp -R 0 /var/opt/mssql/security/ca-certificates
 
 # Installing system utilities
 RUN apt-get update && \

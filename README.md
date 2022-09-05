@@ -4,7 +4,7 @@ In this repo, you'll find two example environments for using SQL Server 2022's s
 
 In my post [Setting up MinIO for SQL Server 2022 s3 Object Storage Integration](https://www.nocentino.com/posts/2022-06-10-setting-up-minio-for-sqlserver-object-storage/) we did this step by step at the command line. Using Docker Compose it will do all the hard work for you and you can get up and running fast. 
 
-Let's walk through what you'll get in each environment. 
+Let's walk through what you'll get in each of these environments. 
 
 ## Backup and Restore Test Environment
 
@@ -70,7 +70,7 @@ Next, the `createbucket` service creates a user in MinIO that we will use inside
                             /usr/bin/mc mb anthony/sqlbackups  --insecure;"
 ```
 
-Finally, we start a service named `sql1`, which runs the latest published container image for SQL Server 2022 `mcr.microsoft.com/mssql/server:2022-latest`.  In this service, we add an `extra_host` so that the SQL Server container can resolve the DNS name of our MinIO container so that it can make the proper TLS connection.  There is a data volume for our SQL Server data `sql-data`, and we're using a bind mount to expose the MinIO container's public certificate into SQL Server to that it's trusted using the code `./certs/public.crt:/usr/local/share/ca-certificates/mssql-ca-certificates/public.crt:ro`.  This location has changed in CTP 2.1, and I will update this post once the container is released.
+Finally, we start a service named `sql1`, which runs the latest published container image for SQL Server 2022 `mcr.microsoft.com/mssql/server:2022-latest`.  In this service, we add an `extra_host` so that the SQL Server container can resolve the DNS name of our MinIO container so that it can make the proper TLS connection.  There is a data volume for our SQL Server data `sql-data`, and we're using a bind mount to expose the MinIO container's public certificate into SQL Server to that it's trusted using the code `./certs/public.crt:/var/opt/mssql/security/ca-certificates/public.crt:ro`. 
 
 ```
   sql1:
@@ -88,7 +88,7 @@ Finally, we start a service named `sql1`, which runs the latest published contai
       - 1433:1433
     volumes:
       - sql-data:/var/opt/mssql
-      - ./certs/public.crt:/usr/local/share/ca-certificates/mssql-ca-certificates/public.crt:ro
+      - ./certs/public.crt:/var/opt/mssql/security/ca-certificates:ro
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=S0methingS@Str0ng!
