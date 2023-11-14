@@ -8,16 +8,17 @@ Let's walk through what you'll get in each of these environments.
 
 ## Backup and Restore Test Environment
 
-Up first is Backups. In this repo's [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory, there's a script [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/backup/demo.sh).  In this script, you will find the commands needed to start the environment and do a basic connectivity test using a SQL Server backup.  To start everything up, you'll change into the [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory and run `docker-compose up --detach`. At this point, you'll have a functioning enviroment, but let's dig into the details of how this is implemented in docker compose.
+Up first is Backups. In this repo's [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory, there's a script [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/backup/demo.sh).  In this script, you will find the commands needed to start the environment and do a basic connectivity test using a SQL Server backup.  To start everything up, you'll change into the [`backup`](https://github.com/nocentino/sql-s3-object-integration/tree/main/backup) directory and run `docker compose up --detach`. At this point, you'll have a functioning enviroment, but let's dig into the details of how this is implemented in docker compose.
 
 ```
-docker-compose up --detach
+docker compose up --detach
 ```
 
 First, since SQL Server's s3 object integration requires a valid and trusted certificate, a service named `config` runs a container that creates the required certificate needed for this environment and stores them in the current working directory in a subdirectory named `certs`.
 
 ```
   config:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: dockerfile.ssl
@@ -32,6 +33,7 @@ Second, we start a service named `minio1` that starts a MinIO container on a sta
 ```
   minio1:
     image: quay.io/minio/minio
+    platform: linux/amd64
     depends_on: 
       - config
     hostname: minio1
@@ -57,15 +59,17 @@ Next, the `createbucket` service creates a user in MinIO that we will use inside
 ```
   createbucket:
     image: minio/mc
+    platform: linux/amd64
     networks:
       s3-data:
     extra_hosts:
       - "s3.example.com:172.18.0.20"
     depends_on:
       - minio1
-    entrypoint: /bin/sh -c "/usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure;
+    entrypoint: /bin/sh -c "sleep 60; 
+                            /usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure;
                             /usr/bin/mc admin user add s3admin anthony nocentino --insecure;
-                            /usr/bin/mc admin policy set s3admin readwrite user=anthony --insecure;
+                            /usr/bin/mc admin policy attach s3admin readwrite --user anthony --insecure;
                             /usr/bin/mc alias set anthony https://s3.example.com:9000 anthony nocentino --insecure;
                             /usr/bin/mc mb anthony/sqlbackups  --insecure;"
 ```
@@ -75,6 +79,7 @@ Finally, we start a service named `sql1`, which runs the latest published contai
 ```
   sql1:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     depends_on: 
       - config
       - createbucket
@@ -88,7 +93,7 @@ Finally, we start a service named `sql1`, which runs the latest published contai
       - 1433:1433
     volumes:
       - sql-data:/var/opt/mssql
-      - ./certs/public.crt:/var/opt/mssql/security/ca-certificates:ro
+      - ./certs/public.crt:/var/opt/mssql/security/ca-certificates/public.crt:ro
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=S0methingS@Str0ng!
@@ -111,20 +116,20 @@ Run the backup to the s3 target
 BACKUP DATABASE TestDB1 TO URL = 's3://s3.example.com:9000/sqlbackups/TestDB1.bak' WITH COMPRESSION, STATS = 10, FORMAT, INIT
 ```
 
-When you're all finished, you can use `docker-compose down --rmi local --volumes` to stop all the containers and destroy all the images and volumes associated with this environment.
+When you're all finished, you can use `docker compose down --rmi local --volumes` to stop all the containers and destroy all the images and volumes associated with this environment.
 
 
 ## Polybase and s3 Data Virtualization Environment
 
-Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory and run `docker-compose up --build --detach`.  This docker-compose manifest will do a few things...let's walk through that.
+Up next is Data Virtualization. In this repo's [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory, there's a script [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).  This script has the commands you'll need to start up the environment and do a basic connectivity test using Polybase-based access to s3-compatible object storage.  To start everything up, you'll change into the [`polybase`](https://github.com/nocentino/sql-s3-object-integration/tree/main/polybase) directory and run `docker compose build` and `docker compose up --detach `.  This docker compose manifest will do a few things...let's walk through that.
 
-This docker-compose manifest starts the same as the backup one above.  But in addition to that, it creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
+This docker compose manifest starts the same as the backup one above.  But in addition to that, it creates the certificate needed, starts a configured MinIO container, and then creates the required user and bucket in MinIO.  It also copies a simple CSV file into the MinIO container.  This is the data we'll access from SQL Server via Polybase over s3. 
 
 Since Polybase isn't enabled by default in the published container image `mcr.microsoft.com/mssql/server:2022-latest`, we have to build a container image for SQL Server with Polybase installed.  And that's what we're doing in the `sql1` service in the dockerfile named [`dockerfile.sql`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/dockerfile.sql). 
 
 ### Start up the environment
 
-Once you're ready to go, start up the environment with `docker-compose up --build --detach` and follow the steps in [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).
+Once you're ready to go, start up the environment with `docker compose up --detach` and follow the steps in [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sh).
 
 With the SQL Server container up and running, let's walk through the steps to access data on s3 compatible object storage. All this code is in [`demo.sql`](https://github.com/nocentino/sql-s3-object-integration/blob/main/polybase/demo.sql) in the repo. But I want to walk you through it here too. 
 
@@ -168,9 +173,9 @@ Create a database scoped credential, this should have at minimum ReadOnly and Li
 CREATE DATABASE SCOPED CREDENTIAL s3_dc WITH IDENTITY = 'S3 Access Key', SECRET = 'anthony:nocentino' ;
 ```
 
-Before you create the external data source, you need to restart the SQL Server container.  To restart your a container started by `docker-compose` you can use this:
+Before you create the external data source, you need to restart the SQL Server container.  To restart your a container started by `docker compose` you can use this:
 ```
-docker-compose restart sql1
+docker compose restart sql1
 ```
 
 If you don't restart the SQL Server container you'll get this error:
@@ -240,4 +245,4 @@ If you get this error below, you will want to increase the memory resource in yo
 
 ## Wrap things up
 
-When you're done, you can use `docker-compose down --volumes  --rmi local` to clean up all the resources, images, network, and the volumes holding the database in the databases and MinIO.
+When you're done, you can use `docker compose down --volumes  --rmi local` to clean up all the resources, images, network, and the volumes holding the database in the databases and MinIO.

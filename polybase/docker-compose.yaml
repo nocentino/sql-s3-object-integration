@@ -2,6 +2,7 @@ version: '3'
 
 services:
   config:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: dockerfile.ssl
@@ -12,6 +13,7 @@ services:
 
   minio1:
     image: quay.io/minio/minio
+    platform: linux/amd64
     depends_on: 
       - config
     hostname: minio1
@@ -33,6 +35,7 @@ services:
 
   createbucket:
     image: minio/mc
+    platform: linux/amd64
     networks:
       s3-data:
     extra_hosts:
@@ -41,14 +44,16 @@ services:
       - minio1
     volumes:
       - ./data:/tmp/data
-    entrypoint: /bin/sh -c "/usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure; 
+    entrypoint: /bin/sh -c "sleep 60; 
+                            /usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure; 
                             /usr/bin/mc admin user add s3admin anthony nocentino --insecure;
-                            /usr/bin/mc admin policy set s3admin readwrite user=anthony --insecure;
+                            /usr/bin/mc admin policy attach s3admin readwrite --user anthony --insecure;
                             /usr/bin/mc alias set anthony https://s3.example.com:9000 anthony nocentino --insecure;
                             /usr/bin/mc mb anthony/sqldatavirt  --insecure;
                             /usr/bin/mc cp /tmp/data/helloworld.csv anthony/sqldatavirt/helloworld.csv --insecure;"
       
   sql1:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: dockerfile.sql

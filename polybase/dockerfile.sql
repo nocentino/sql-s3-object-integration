@@ -8,7 +8,7 @@ RUN mkdir -p -m 770 /var/opt/mssql/security/ca-certificates && chgrp -R 0 /var/o
 RUN apt-get update && \
     apt-get install -y apt-transport-https curl gnupg2 && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-preview.list  > /etc/apt/sources.list.d/mssql-server-preview.list 
+    curl https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2022.list  > /etc/apt/sources.list.d/msprod.list
 
 # Installing SQL Server drivers and tools
 RUN apt-get update && \
