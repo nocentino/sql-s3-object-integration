@@ -9,4 +9,3 @@ docker compose up --detach
 
 ##Remove the images we built and also the volumes we created. 
 docker compose down --rmi local --volumes
-rm -rf ./certs

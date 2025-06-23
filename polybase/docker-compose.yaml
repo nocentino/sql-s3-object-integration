@@ -1,15 +1,11 @@
-version: '3'
-
 services:
   config:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: dockerfile.ssl
-    volumes:
-      - ./openssl.cnf:/tmp/certs/openssl.cnf
-      - ./certs:/certs
-    command: openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /certs/private.key -out /certs/public.crt -config /tmp/certs/openssl.cnf
+      build:
+        context: .
+        dockerfile: dockerfile.ssl
+      volumes:
+        - "./certs/:/certs/"
+      command: sh /certs/generate_ssl.sh
 
   minio1:
     image: quay.io/minio/minio
