@@ -1,22 +1,10 @@
---Confirm if the Polybase feature is installed, 1 = installed
-SELECT SERVERPROPERTY ('IsPolyBaseInstalled') AS IsPolyBaseInstalled;
-
-
---Next, enable Polybase in your instance's configuration
-exec sp_configure @configname = 'polybase enabled', @configvalue = 1;
-RECONFIGURE;
-
-
---Confirm if Polybase is in your running config, run_value should be 1
-exec sp_configure @configname = 'polybase enabled'
-
-
 --Create a database to hold objects for the demo
-CREATE DATABASE [PolybaseDemo];
-
+CREATE DATABASE [DataVirtualizationDemo];
+GO
 
 --Switch into the database context
-USE PolybaseDemo
+USE DataVirtualizationDemo;
+GO
 
 
 --Create a database master key, this is use to protect the credentials you're about to create
@@ -25,13 +13,6 @@ CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'S0methingS@Str0ng!';
 
 --Create a database scoped credential, this should have at minimum ReadOnly and ListBucket access to the s3 bucket
 CREATE DATABASE SCOPED CREDENTIAL s3_dc WITH IDENTITY = 'S3 Access Key', SECRET = 'anthony:nocentino' ;
-
-
---Before you create the external data source, you need to restart the sql server container. 
---If you don't you'll get this error:
---  Msg 46530, Level 16, State 11, Line 1
---  External data sources are not supported with type GENERIC.
-docker-compose restart sql1
 
 
 --Create your external datasource on your s3 compatible object storage, referencing where it is on the network (LOCATION) and the credential you just defined
@@ -76,3 +57,5 @@ WITH (
 
 --Now we can access the data just like any other table in sql server. 
 SELECT * FROM [HelloWorld];
+
+

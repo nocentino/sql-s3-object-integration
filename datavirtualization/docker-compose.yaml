@@ -7,7 +7,7 @@ services:
         - "./certs/:/certs/"
       command: sh /certs/generate_ssl.sh
 
-  minio1:
+  s3.example.com:
     image: quay.io/minio/minio
     platform: linux/amd64
     depends_on: 
@@ -15,9 +15,6 @@ services:
     hostname: minio1
     networks:
       s3-data:
-        ipv4_address: 172.18.0.20
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     ports:
       - 9000:9000
       - 9001:9001
@@ -34,10 +31,8 @@ services:
     platform: linux/amd64
     networks:
       s3-data:
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     depends_on:
-      - minio1
+      - s3.example.com
     volumes:
       - ./data:/tmp/data
     entrypoint: /bin/sh -c "sleep 60; 
@@ -50,18 +45,13 @@ services:
       
   sql1:
     platform: linux/amd64
-    build:
-      context: .
-      dockerfile: dockerfile.sql
+    image: mcr.microsoft.com/mssql/server:2025-RC1-ubuntu-24.04
     depends_on: 
       - config
       - createbucket
-      - minio1
     hostname: sql1
     networks:
       - s3-data
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     ports:
       - 1433:1433
     volumes:
@@ -77,7 +67,3 @@ volumes:
 
 networks:
   s3-data:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.18.0.0/24"
