@@ -43,7 +43,7 @@ services:
                             /usr/bin/mc mb anthony/sqlbackups  --insecure;"
       
   sql1:
-    image: mcr.microsoft.com/mssql/server:2025-RC1-ubuntu-24.04
+    image: mcr.microsoft.com/mssql/server:2025-latest
     platform: linux/amd64
     depends_on: 
       - config

@@ -45,7 +45,7 @@ services:
       
   sql1:
     platform: linux/amd64
-    image: mcr.microsoft.com/mssql/server:2025-RC1-ubuntu-24.04
+    image: mcr.microsoft.com/mssql/server:2025-latest
     depends_on: 
       - config
       - createbucket
