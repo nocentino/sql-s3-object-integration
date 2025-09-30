@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   config:
     platform: linux/amd64
@@ -11,17 +9,14 @@ services:
       - ./certs:/certs
     command: openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /certs/private.key -out /certs/public.crt -config /tmp/certs/openssl.cnf
 
-  minio1:
+  s3.example.com:
     image: quay.io/minio/minio
     platform: linux/amd64
     depends_on: 
       - config
-    hostname: minio1
+    hostname: s3.example.com
     networks:
       s3-data:
-        ipv4_address: 172.18.0.20
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     ports:
       - 9000:9000
       - 9001:9001
@@ -38,10 +33,8 @@ services:
     platform: linux/amd64
     networks:
       s3-data:
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     depends_on:
-      - minio1
+      - s3.example.com
     entrypoint: /bin/sh -c "sleep 60; 
                             /usr/bin/mc alias set s3admin https://s3.example.com:9000 MYROOTUSER MYROOTPASSWORD --api S3v4 --insecure;
                             /usr/bin/mc admin user add s3admin anthony nocentino --insecure;
@@ -50,17 +43,15 @@ services:
                             /usr/bin/mc mb anthony/sqlbackups  --insecure;"
       
   sql1:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-RC1-ubuntu-24.04
     platform: linux/amd64
     depends_on: 
       - config
       - createbucket
-      - minio1
+      - s3.example.com
     hostname: sql1
     networks:
       - s3-data
-    extra_hosts:
-      - "s3.example.com:172.18.0.20"
     ports:
       - 1433:1433
     volumes:
@@ -76,7 +67,3 @@ volumes:
 
 networks:
   s3-data:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.18.0.0/24"

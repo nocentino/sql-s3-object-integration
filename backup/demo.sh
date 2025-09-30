@@ -25,5 +25,5 @@ sqlcmd -S localhost,1433 -U sa -Q $QUERY -P 'S0methingS@Str0ng!'
 
 
 ##Remove the images we built and also the volumes we created. 
-docker compose down --rmi local --volumes
+# docker compose down --rmi local --volumes
 rm -rf ./certs
