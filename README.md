@@ -9,6 +9,7 @@ This repository provides two example environments for using SQL Server's S3 obje
 - **Improved Certificate Handling**: The `config` service now generates SSL certificates before other services start, ensuring proper sequencing and avoiding mount errors.
 - **PolyBase Configuration**: The demo SQL script now enables PolyBase and advanced options at the start, following best practices.
 - **Consistent Naming**: Service and file names have been updated for clarity and consistency.
+- **Backup Demo Script Improvements**: The [`backup/demo.sh`](./backup/demo.sh) script now automates the full backup workflow, including environment startup, database creation, S3 credential creation, backup execution, and cleanup of generated certificates.
 
 ---
 
@@ -17,7 +18,8 @@ This repository provides two example environments for using SQL Server's S3 obje
 In the [`backup`](./backup) directory, you'll find a script [`demo.sh`](./backup/demo.sh) to start the environment and perform a basic connectivity test using SQL Server backup. To start everything up, change into the [`backup`](./backup) directory and run:
 
 ```
-docker compose up --detach
+cd ./backup
+./demo.sh
 ```
 
 ### How it Works
@@ -34,7 +36,25 @@ docker compose up --detach
 4. **SQL Server Service**:  
    The `sql1` service runs SQL Server, mounting the MinIO public certificate for trusted TLS connections.
 
+5. **Automated Demo Script**:  
+   The [`demo.sh`](./backup/demo.sh) script:
+   - Starts the Docker Compose environment
+   - Waits for SQL Server to be ready and verifies connectivity
+   - Creates a test database
+   - Creates the S3 credential in SQL Server
+   - Executes a backup to the S3 bucket
+   - (Optionally) Cleans up generated certificates with `rm -rf ./certs`
+
 ### Example Usage
+
+You can run the entire workflow with:
+
+```
+cd ./backup
+./demo.sh
+```
+
+Or, if you want to run the steps manually:
 
 Create a database:
 ```
@@ -54,6 +74,7 @@ BACKUP DATABASE TestDB1 TO URL = 's3://s3.example.com:9000/sqlbackups/TestDB1.ba
 Cleanup:
 ```
 docker compose down --rmi local --volumes
+rm -rf ./certs
 ```
 
 ---
@@ -103,10 +124,6 @@ GO
 
 See [`demo.sql`](./datavirtualization/demo.sql) for the full workflow.
 
-### Memory Requirements
-
-If you encounter memory errors with PolyBase, increase Docker's memory allocation to at least 4GB.
-
 ---
 
 ## Cleanup
@@ -115,6 +132,7 @@ To stop and remove all containers, images, and volumes:
 
 ```
 docker compose down --rmi local --volumes
+rm -rf ./certs
 ```
 
 ---
