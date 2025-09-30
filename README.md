@@ -15,12 +15,7 @@ This repository provides two example environments for using SQL Server's S3 obje
 
 ## Backup and Restore Test Environment
 
-In the [`backup`](./backup) directory, you'll find a script [`demo.sh`](./backup/demo.sh) to start the environment and perform a basic connectivity test using SQL Server backup. To start everything up, change into the [`backup`](./backup) directory and run:
-
-```
-cd ./backup
-./demo.sh
-```
+In the [`backup`](./backup) directory, you'll find a script [`demo.sh`](./backup/demo.sh) to start the environment and perform a basic connectivity test using SQL Server backup. 
 
 ### How it Works
 
@@ -36,7 +31,7 @@ cd ./backup
 4. **SQL Server Service**:  
    The `sql1` service runs SQL Server, mounting the MinIO public certificate for trusted TLS connections.
 
-5. **Automated Demo Script**:  
+5. **Demo Script**:  
    The [`demo.sh`](./backup/demo.sh) script:
    - Starts the Docker Compose environment
    - Waits for SQL Server to be ready and verifies connectivity
@@ -47,14 +42,7 @@ cd ./backup
 
 ### Example Usage
 
-You can run the entire workflow with:
-
-```
-cd ./backup
-./demo.sh
-```
-
-Or, if you want to run the steps manually:
+Run each of the steps manually:
 
 Create a database:
 ```
