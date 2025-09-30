@@ -58,4 +58,40 @@ WITH (
 --Now we can access the data just like any other table in sql server. 
 SELECT * FROM [HelloWorld];
 
+USE master;
+GO
+
+sp_configure 'show advanced options', 1;
+RECONFIGURE;
+GO
+sp_configure 'allow polybase export', 1;
+RECONFIGURE;
+GO
+
+
+USE DataVirtualizationDemo;
+GO
+
+CREATE EXTERNAL FILE FORMAT ParquetFileFormat
+WITH
+(    FORMAT_TYPE = PARQUET
+);
+
+CREATE EXTERNAL TABLE ParquetHelloWorld 
+WITH ( DATA_SOURCE = s3_ds
+     , LOCATION = '/sqldatavirt/ParquetHelloWorld.parquet'
+     , FILE_FORMAT = ParquetFileFormat
+     , REJECT_TYPE = VALUE
+     , REJECT_VALUE = 0
+     )
+AS
+SELECT * FROM HelloWorld;
+
+
+SELECT *
+FROM OPENROWSET
+(    BULK '/sqldatavirt/ParquetHelloWorld.parquet'
+,    DATA_SOURCE = 's3_ds'
+,    FORMAT = 'PARQUET'
+) AS [result];
 
