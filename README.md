@@ -5,6 +5,7 @@ This repository provides two example environments for using SQL Server's S3 obje
 ## What's New
 
 - **Updated for SQL Server 2025 RC1 and Ubuntu 24.04**: The data virtualization environment now uses the latest SQL Server container image, upgraded from the previous example using SQL Server 2022.
+- **No PolyBase Installation Required for Parquet/S3**: New to SQL Server 2025, you no longer need to install the PolyBase service to interact with Parquet files in S3. Previously, with SQL Server 2022, you had to build a custom container or manually install the PolyBase service to enable this functionality.
 - **Improved Certificate Handling**: The `config` service now generates SSL certificates before other services start, ensuring proper sequencing and avoiding mount errors.
 - **PolyBase Configuration**: The demo SQL script now enables PolyBase and advanced options at the start, following best practices.
 - **Consistent Naming**: Service and file names have been updated for clarity and consistency.
@@ -88,6 +89,10 @@ sp_configure 'polybase enabled', 1;
 RECONFIGURE;
 GO
 ```
+
+> **Note:**  
+> **SQL Server 2025 makes PolyBase easier than ever:**  
+> You no longer need to install the PolyBase service to interact with Parquet files in S3. This is a major improvement over SQL Server 2022, where you had to build a custom container or manually install PolyBase to enable this functionality.
 
 ### Example Usage
 
