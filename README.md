@@ -42,7 +42,7 @@ In the [`backup`](./backup) directory, you'll find a script [`demo.sh`](./backup
 
 ### Example Usage
 
-Run each of the steps manually:
+In [`demo.sh`](https://github.com/nocentino/sql-s3-object-integration/blob/main/backup/demo.sh) run each of these line by line to walk through the demo:
 
 Create a database:
 ```
