@@ -121,6 +121,7 @@ GO
 - Create a database scoped credential for S3 access
 - Create an external data source referencing your S3 bucket
 - Use `OPENROWSET` or create external tables to query data in S3
+- Use `CREATE EXTERNAL TABLE AS SELECT` to create and read a parquet file in S3
 
 See [`demo.sql`](./datavirtualization/demo.sql) for the full workflow.
 
